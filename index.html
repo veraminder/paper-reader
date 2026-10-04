@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Paper Reader</title>
+  <meta name="description" content="Reads academic PDFs aloud, with an AI note-taking helper." />
+  <meta name="theme-color" content="#16281F" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Paper Reader" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <button id="settings-btn" class="settings-btn" title="Settings (your name, Claudette's Gemini key)">&#9881;</button>
+
+    <!-- ---------- Welcome ---------- -->
+    <section id="welcome" class="welcome">
+      <div class="welcome-glow" aria-hidden="true"></div>
+
+      <div class="welcome-card">
+        <span class="eyebrow" id="greeting-eyebrow">Good evening</span>
+
+        <form id="name-form" class="name-form" hidden>
+          <h1 class="welcome-title">Welcome to Paper Reader.<br />What&rsquo;s your name?</h1>
+          <div class="rule" aria-hidden="true"><span></span><span></span></div>
+          <p class="welcome-copy">It&rsquo;s only used to greet you, and stays in this browser.</p>
+          <div class="welcome-actions">
+            <input id="name-input" class="name-input" type="text" autocomplete="given-name" maxlength="40" placeholder="Your name" />
+            <button type="submit" class="btn-primary">Continue</button>
+          </div>
+        </form>
+
+        <div id="welcome-main" hidden>
+          <h1 class="welcome-title">Hi <span class="name"></span>.<br />What are we reading today?</h1>
+          <div class="rule" aria-hidden="true"><span></span><span></span></div>
+          <p class="welcome-copy">
+            Drop in a paper and it will be read aloud sentence by sentence &mdash;
+            headings announced, footnotes left out of the way.
+          </p>
+          <div class="welcome-actions">
+            <button id="open-btn" class="btn-primary">Choose a PDF</button>
+            <button id="library-btn" class="btn-ghost">Library</button>
+          </div>
+          <p class="welcome-hint">or drag a PDF in anywhere on this card</p>
+          <p id="voice-status" class="welcome-foot"></p>
+        </div>
+        <p id="empty-error" class="error-text" hidden></p>
+      </div>
+    </section>
+
+    <!-- ---------- Loading ---------- -->
+    <section id="loading" class="loading" hidden>
+      <div class="loading-inner">
+        <div class="page-stack" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <p class="loading-title" id="loading-title">Reading the paper&hellip;</p>
+        <p class="loading-sub" id="loading-sub">Working out headings, body text and footnotes.</p>
+      </div>
+    </section>
+
+    <!-- ---------- Library ---------- -->
+    <section id="library" class="library" hidden>
+      <div class="library-head">
+        <h2>Library</h2>
+        <div class="library-head-actions">
+          <button id="library-info-btn" class="btn-ghost library-info-btn" title="Where are my notes stored?" aria-label="Where are my notes stored?">i</button>
+          <button id="library-backup-btn" class="btn-ghost" title="Save all notes, folders and their PDFs as one file">Back up</button>
+          <button id="library-restore-btn" class="btn-ghost" title="Load notes from a backup file">Restore</button>
+          <button id="library-new-folder-btn" class="btn-ghost">New folder</button>
+          <button id="library-back-btn" class="btn-ghost">Back</button>
+        </div>
+      </div>
+      <p id="library-status" class="library-status" hidden></p>
+      <div id="library-list" class="library-list"></div>
+      <p id="library-empty" class="library-empty" hidden>Nothing saved yet — open a paper, take some notes, and press Save.</p>
+    </section>
+
+    <!-- ---------- Reader ---------- -->
+    <section id="reader" class="reader" hidden>
+
+      <button id="sidebar-toggle" class="sidebar-toggle" title="Toggle sidebar">&#8249;</button>
+
+      <aside class="sidebar">
+        <div class="ribbon-track"><div id="ribbon-fill" class="ribbon-fill"></div></div>
+        <div class="sidebar-head">
+          <span class="doc-label">Now reading</span>
+          <h2 id="doc-title" class="doc-title">&mdash;</h2>
+          <p id="doc-stats" class="doc-stats"></p>
+          <div class="sidebar-head-actions">
+            <button id="new-doc-btn" class="btn-ghost">Open another paper</button>
+            <button id="reader-library-btn" class="btn-ghost">Library</button>
+          </div>
+        </div>
+        <ol id="outline" class="outline"></ol>
+      </aside>
+
+      <main class="pane">
+        <div id="page-view" class="page-view"></div>
+        <button id="follow-pill" class="follow-pill" hidden>&#9660; Back to current</button>
+        <button id="selection-chip" class="selection-chip" type="button" hidden></button>
+
+        <div class="tool-controls">
+          <button id="tool-cite" class="tool-btn tool-cite" data-tool="cite" title="Cite: select text to quote it, with page number">Cite</button>
+          <button id="tool-summarize" class="tool-btn tool-summarize" data-tool="summarize" title="Summarize: select text for a Claudette bullet">Summarize</button>
+          <button id="tool-comment" class="tool-btn tool-comment" data-tool="comment" title="Comment: select text and add your own note">Comment</button>
+          <button id="tool-explain" class="tool-btn tool-explain" data-tool="explain" title="Explain: select text for Claudette to explain in chat (no note added)">Explain</button>
+        </div>
+
+        <div id="search-bar" class="search-bar" hidden>
+          <input id="search-input" type="text" class="search-input" placeholder="Find in paper…" autocomplete="off" />
+          <span id="search-count" class="search-count">0/0</span>
+          <button id="search-prev-btn" class="btn-icon" title="Previous match (&#8679;&#9166;)">&#8593;</button>
+          <button id="search-next-btn" class="btn-icon" title="Next match (&#9166;)">&#8595;</button>
+          <button id="search-close-btn" class="btn-icon" title="Close (Esc)">&times;</button>
+        </div>
+
+        <div class="zoom-controls">
+          <button id="zoom-out-btn" class="btn-icon" title="Zoom out (&#8984;&minus;)">&minus;</button>
+          <span id="zoom-level" class="zoom-level">100%</span>
+          <button id="zoom-in-btn" class="btn-icon" title="Zoom in (&#8984;+)">+</button>
+        </div>
+
+        <footer id="controls" class="controls">
+          <button id="controls-toggle-btn" class="controls-toggle-btn" title="Collapse controls">&#9662;</button>
+
+          <div id="controls-body" class="controls-body">
+            <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+
+            <div class="controls-row meta-row">
+              <span id="position-label" class="position-label">&ndash;</span>
+              <span id="time-label" class="time-label">&ndash;</span>
+            </div>
+
+            <div class="controls-row transport">
+              <button id="prev-btn" class="btn-icon" title="Previous sentence">&#8592;</button>
+              <button id="play-btn" class="btn-play" title="Play">
+                <span id="play-icon">&#9658;</span>
+                <span id="spinner" class="spinner" hidden></span>
+              </button>
+              <button id="next-btn" class="btn-icon" title="Next sentence">&#8594;</button>
+            </div>
+
+            <div class="controls-row settings-row">
+              <label class="control-label" for="voice-select">Voice</label>
+              <select id="voice-select" class="select"></select>
+
+              <label class="control-label" for="speed-range">Speed</label>
+              <input id="speed-range" type="range" min="0.6" max="1.8" step="0.05" value="1" />
+              <span id="speed-value" class="speed-value">1.00&times;</span>
+            </div>
+
+            <div class="controls-row toggles-row">
+              <label class="toggle"><input type="checkbox" id="opt-headings" checked /> Read headings</label>
+              <label class="toggle"><input type="checkbox" id="opt-footnotes" /> Read footnotes</label>
+              <label class="toggle"><input type="checkbox" id="opt-references" checked /> Skip references</label>
+              <label class="toggle"><input type="checkbox" id="opt-citations" checked /> Skip citations</label>
+            </div>
+
+            <p id="status" class="status"></p>
+          </div>
+        </footer>
+      </main>
+
+      <button id="notes-toggle" class="notes-toggle" title="Toggle Claudette's notes">&#8249;</button>
+
+      <aside id="notes-panel" class="notes-panel">
+        <div class="notes-head">
+          <span class="doc-label">Claudette&rsquo;s notes</span>
+          <div class="notes-toolbar">
+            <button id="copy-notes-btn" class="btn-ghost">Copy</button>
+            <button id="save-notes-btn" class="btn-ghost">Save</button>
+          </div>
+        </div>
+
+        <div id="notes-body" class="notes-body">
+          <div id="existing-notes-banner" class="existing-notes-banner" hidden>
+            <p id="existing-notes-text"></p>
+            <div class="existing-notes-actions">
+              <button id="existing-notes-load-btn" class="btn-primary">Load saved notes</button>
+              <button id="existing-notes-dismiss-btn" class="btn-ghost">Start fresh</button>
+            </div>
+          </div>
+          <div id="notes-title-block" class="notes-title-block"></div>
+
+          <div class="notes-section">
+            <h4>Main point</h4>
+            <ul id="notes-main-point" class="notes-list"></ul>
+          </div>
+
+          <div class="notes-section">
+            <h4>Method</h4>
+            <ul id="notes-method" class="notes-list"></ul>
+          </div>
+
+          <div class="notes-section">
+            <h4>Notes</h4>
+            <ul id="notes-mixed" class="notes-list notes-list-mixed"></ul>
+          </div>
+
+          <div class="notes-section">
+            <h4>Citations</h4>
+            <ul id="notes-citations" class="notes-list"></ul>
+          </div>
+        </div>
+
+        <div id="claudette-chat" class="claudette-chat">
+          <div id="chat-resize-handle" class="chat-resize-handle" title="Drag to resize"></div>
+          <div id="chat-messages" class="chat-messages"></div>
+          <form id="chat-form" class="chat-form">
+            <input id="chat-input" type="text" class="chat-input" placeholder="Ask Claudette&hellip;" autocomplete="off" />
+            <button type="submit" class="chat-send" title="Ask">&#8594;</button>
+          </form>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <!-- ---------- Settings modal ---------- -->
+  <div id="settings-modal" class="modal-overlay" hidden>
+    <div class="modal">
+      <h3>Settings</h3>
+      <label class="modal-label" for="settings-name-input">Your name</label>
+      <input id="settings-name-input" type="text" class="modal-input" maxlength="40" autocomplete="given-name" />
+
+      <label class="modal-label" for="api-key-input">Claudette (Gemini API key)</label>
+      <p class="modal-copy">
+        Claudette uses Google's free Gemini API for summaries and notes.
+        Paste in your own free API key (create one at
+        <strong>aistudio.google.com/apikey</strong>) &mdash; it stays in
+        this browser and is only sent to Google when you use an AI
+        feature. When you do, the paper's text is sent to Google too.
+      </p>
+      <input id="api-key-input" type="password" class="modal-input" placeholder="Gemini API key" autocomplete="off" />
+      <p id="settings-status" class="modal-status"></p>
+      <div class="modal-actions">
+        <button id="settings-clear-btn" class="btn-ghost">Remove key</button>
+        <button id="settings-cancel-btn" class="btn-ghost">Cancel</button>
+        <button id="settings-save-btn" class="btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Delete confirmation modal ---------- -->
+  <div id="confirm-modal" class="modal-overlay" hidden>
+    <div class="modal">
+      <h3 id="confirm-modal-title">Delete this entry?</h3>
+      <p class="modal-copy" id="confirm-modal-text">This can&rsquo;t be undone.</p>
+      <div class="modal-actions">
+        <button id="confirm-modal-cancel-btn" class="btn-ghost">Cancel</button>
+        <button id="confirm-modal-delete-btn" class="btn-danger">Delete permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Where notes are stored ---------- -->
+  <div id="storage-info-modal" class="modal-overlay" hidden>
+    <div class="modal modal-wide storage-info">
+      <h3>Where are my notes stored?</h3>
+      <p class="modal-copy">
+        Everything you save &mdash; notes, folders, and the PDFs they belong to &mdash;
+        is kept <strong>inside this browser, on this device</strong>. It is not
+        uploaded anywhere: not to GitHub, not to a server, and nobody else can see it.
+        Your name and Gemini key are kept the same way.
+      </p>
+      <p id="storage-info-status" class="storage-info-status" hidden></p>
+
+      <h4>Each device and browser has its own library</h4>
+      <ul>
+        <li><strong>iPad and iPhone:</strong> add Paper Reader to your Home Screen
+          (in Safari, tap the Share button, then <em>Add to Home Screen</em>) and always
+          open it from that icon. The Home Screen app keeps its own library, separate
+          from Safari tabs. If you use it in a normal Safari tab instead, Safari deletes
+          its data after 7 days in which you haven&rsquo;t opened it.</li>
+        <li><strong>Mac with Safari:</strong> the same 7-day rule applies to normal tabs.
+          On macOS 14 or newer you can avoid it with <em>File &rarr; Add to Dock</em>
+          and opening it from the Dock.</li>
+        <li><strong>Chrome, Edge or Firefox (Windows, Mac, Android, Chromebook):</strong>
+          kept until you clear the browser&rsquo;s data.</li>
+        <li>Libraries don&rsquo;t sync: notes made on your iPad aren&rsquo;t on your
+          laptop. Use Back up and Restore to move them.</li>
+      </ul>
+
+      <h4>How notes can be lost</h4>
+      <ul>
+        <li>Clearing browsing data &mdash; e.g. iPad <em>Settings &rarr; Safari &rarr; Clear
+          History and Website Data</em>, or Chrome&rsquo;s <em>Delete browsing data</em>
+          with &ldquo;Cookies and site data&rdquo; ticked.</li>
+        <li>Deleting the Paper Reader icon from the Home Screen.</li>
+        <li>Using a private or incognito window: everything is gone when it closes.</li>
+        <li>A nearly full device: browsers may clear website data to free space.
+          Paper Reader asks the browser to keep its data, but that isn&rsquo;t a guarantee.</li>
+        <li>The 7-day rule in Safari tabs (see above).</li>
+      </ul>
+
+      <h4>Back up and Restore</h4>
+      <ul>
+        <li><strong>Back up</strong> saves everything &mdash; notes, folders and the PDFs &mdash;
+          as one file. Keep it somewhere safe, like iCloud Drive, Google Drive or Files,
+          and make a new one every so often.</li>
+        <li><strong>Restore</strong> loads a backup file. It only adds: nothing already in
+          your library is deleted. If the same paper is in both, the more recently
+          saved version is kept. Use it to move your library to a new device or browser.</li>
+        <li>Your name and Gemini key aren&rsquo;t in backup files.</li>
+      </ul>
+
+      <div class="modal-actions">
+        <button id="storage-info-close-btn" class="btn-primary">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
