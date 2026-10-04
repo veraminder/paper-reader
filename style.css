@@ -1309,22 +1309,69 @@ html, body {
   max-height: 88vh;
   overflow-y: auto;
 }
-.storage-info h4 {
+.info-modal h4 {
   margin: 18px 0 6px;
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 16px;
   color: var(--parchment);
 }
-.storage-info ul {
-  margin: 0;
+.info-modal ul {
+  margin: 0 0 16px;
   padding-left: 18px;
   font-size: 12.5px;
   line-height: 1.6;
   color: var(--parchment-dim);
 }
-.storage-info li + li { margin-top: 6px; }
-.storage-info strong { color: var(--parchment); }
+.info-modal li + li { margin-top: 6px; }
+.info-modal strong { color: var(--parchment); }
+.info-modal a { color: var(--brass-soft); }
+
+/* "i" under the highlighter tools, on the dark page background. */
+.tool-info-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(224, 196, 106, 0.35);
+  background: rgba(16, 31, 25, 0.6);
+  color: var(--brass-soft);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.tool-info-btn:hover { border-color: var(--brass-soft); background: var(--green-700); }
+
+/* Tool names in the explanation, coloured like the tool buttons. */
+.tool-tag {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 2px;
+  font-weight: 700;
+  color: #2a2620;
+}
+
+/* Small "i" next to the voice menu, on the light footer. */
+.voice-info-btn {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(36, 33, 29, 0.3);
+  background: transparent;
+  color: var(--charcoal-soft);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+.voice-info-btn:hover { color: var(--green-700); border-color: var(--green-700); }
 .storage-info-status {
   margin: 0 0 4px;
   padding: 10px 12px;

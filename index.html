@@ -113,6 +113,7 @@
           <button id="tool-summarize" class="tool-btn tool-summarize" data-tool="summarize" title="Summarize: select text for a Claudette bullet">Summarize</button>
           <button id="tool-comment" class="tool-btn tool-comment" data-tool="comment" title="Comment: select text and add your own note">Comment</button>
           <button id="tool-explain" class="tool-btn tool-explain" data-tool="explain" title="Explain: select text for Claudette to explain in chat (no note added)">Explain</button>
+          <button id="tool-info-btn" class="tool-info-btn" type="button" title="What do the tools do?" aria-label="What do the tools do?">i</button>
         </div>
 
         <div id="search-bar" class="search-bar" hidden>
@@ -152,6 +153,7 @@
             <div class="controls-row settings-row">
               <label class="control-label" for="voice-select">Voice</label>
               <select id="voice-select" class="select"></select>
+              <button id="voice-info-btn" class="voice-info-btn" type="button" title="About the voices" aria-label="About the voices">i</button>
 
               <label class="control-label" for="speed-range">Speed</label>
               <input id="speed-range" type="range" min="0.6" max="1.8" step="0.05" value="1" />
@@ -263,7 +265,7 @@
 
   <!-- ---------- Where notes are stored ---------- -->
   <div id="storage-info-modal" class="modal-overlay" hidden>
-    <div class="modal modal-wide storage-info">
+    <div class="modal modal-wide info-modal">
       <h3>Where are my notes stored?</h3>
       <p class="modal-copy">
         Everything you save &mdash; notes, folders, and the PDFs they belong to &mdash;
@@ -314,6 +316,87 @@
 
       <div class="modal-actions">
         <button id="storage-info-close-btn" class="btn-primary">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- About the tools ---------- -->
+  <div id="tool-info-modal" class="modal-overlay" hidden>
+    <div class="modal modal-wide info-modal">
+      <h3>The highlighter tools</h3>
+      <p class="modal-copy">
+        Tap a tool so it lights up, then select text on the page. Each tool
+        marks the text in its own colour and adds to Claudette&rsquo;s notes
+        (the panel on the right). Tap the tool again to switch it off &mdash;
+        then tapping a sentence starts reading from there.
+      </p>
+      <ul>
+        <li><span class="tool-tag tool-cite">Cite</span> copies the exact words,
+          in quotation marks with the page number, into <strong>Citations</strong>.
+          Works without Claudette.</li>
+        <li><span class="tool-tag tool-summarize">Summarize</span> &mdash; Claudette
+          turns the passage into one short note capturing its point, and adds it
+          to <strong>Notes</strong>.</li>
+        <li><span class="tool-tag tool-comment">Comment</span> lets you write
+          your own thought about the passage. Claudette adds a short line saying
+          what the passage itself claims, so your comment still makes sense later.</li>
+        <li><span class="tool-tag tool-explain">Explain</span> &mdash; Claudette
+          explains the passage in plain words in the chat below the notes. Nothing
+          is added to your notes; if you like the explanation, type
+          &ldquo;add that to my notes&rdquo; in the chat.</li>
+      </ul>
+
+      <h4>Selecting text</h4>
+      <ul>
+        <li><strong>With a mouse or trackpad:</strong> drag across the text and let go.</li>
+        <li><strong>On an iPad or phone:</strong> press and hold the first word for
+          a moment, drag to the last word, let go, then tap the button that appears.</li>
+        <li>Remove a note with the small &times; next to it. Press <strong>Save</strong>
+          in the notes panel to keep your notes in the Library.</li>
+        <li>Summarize, Comment and Explain need Claudette, so add your free Gemini key
+          in Settings (the &#9881; button) first.</li>
+      </ul>
+
+      <h4>Ideas for more tools?</h4>
+      <p class="modal-copy">
+        If there&rsquo;s something you&rsquo;d love a tool to do, <strong>let Vera know</strong>.
+      </p>
+
+      <div class="modal-actions">
+        <button id="tool-info-close-btn" class="btn-primary">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- About the voices ---------- -->
+  <div id="voice-info-modal" class="modal-overlay" hidden>
+    <div class="modal modal-wide info-modal">
+      <h3>About the voices</h3>
+      <p class="modal-copy">
+        The reading voices come from <strong>Piper</strong>, a free, open-source
+        text-to-speech project. Each voice was trained on recordings of a real
+        speaker and is shared openly for anyone to use.
+      </p>
+      <ul>
+        <li>The voice runs <strong>on your own device</strong>: the paper isn&rsquo;t sent
+          anywhere to be read aloud.</li>
+        <li>Each voice downloads <strong>once</strong> (about 60&nbsp;MB) the first time you
+          use it, then stays saved in this browser. After that it starts quickly.</li>
+      </ul>
+
+      <h4>Want a different voice?</h4>
+      <p class="modal-copy">
+        There are many more voices &mdash; other accents, other languages (German,
+        French, Spanish and lots more) and different qualities. You can listen to
+        all of them here:
+        <a href="https://rhasspy.github.io/piper-samples/" target="_blank" rel="noopener">Piper voice samples</a>.
+        Pick a language and a voice, play the sample, and if you find one you like,
+        <strong>let Vera know its name</strong> (for example &ldquo;en_GB&nbsp;&middot;&nbsp;cori&nbsp;&middot;&nbsp;high&rdquo;)
+        and she&rsquo;ll add it.
+      </p>
+
+      <div class="modal-actions">
+        <button id="voice-info-close-btn" class="btn-primary">Got it</button>
       </div>
     </div>
   </div>

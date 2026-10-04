@@ -62,6 +62,8 @@ const els = {};
   "welcome-main", "name-form", "name-input", "settings-name-input", "selection-chip",
   "library-backup-btn", "library-restore-btn", "library-info-btn",
   "storage-info-modal", "storage-info-close-btn", "storage-info-status",
+  "voice-info-btn", "voice-info-modal", "voice-info-close-btn",
+  "tool-info-btn", "tool-info-modal", "tool-info-close-btn",
   "reader", "sidebar-toggle", "new-doc-btn", "doc-title", "doc-stats", "outline", "ribbon-fill",
   "page-view", "follow-pill", "zoom-out-btn", "zoom-in-btn", "zoom-level",
   "search-bar", "search-input", "search-count", "search-prev-btn", "search-next-btn", "search-close-btn",
@@ -295,6 +297,16 @@ async function init() {
   els.storageInfoCloseBtn.addEventListener("click", () => { els.storageInfoModal.hidden = true; });
   els.storageInfoModal.addEventListener("click", (e) => {
     if (e.target === els.storageInfoModal) els.storageInfoModal.hidden = true;
+  });
+  els.toolInfoBtn.addEventListener("click", () => { els.toolInfoModal.hidden = false; });
+  els.toolInfoCloseBtn.addEventListener("click", () => { els.toolInfoModal.hidden = true; });
+  els.toolInfoModal.addEventListener("click", (e) => {
+    if (e.target === els.toolInfoModal) els.toolInfoModal.hidden = true;
+  });
+  els.voiceInfoBtn.addEventListener("click", () => { els.voiceInfoModal.hidden = false; });
+  els.voiceInfoCloseBtn.addEventListener("click", () => { els.voiceInfoModal.hidden = true; });
+  els.voiceInfoModal.addEventListener("click", (e) => {
+    if (e.target === els.voiceInfoModal) els.voiceInfoModal.hidden = true;
   });
 
   setupTouchSelection();
